@@ -1,11 +1,9 @@
 from django.shortcuts import render
 
-# Create your views here.
-
 from rest_framework.response import Response
 from rest_framework.decorators import api_view
 
-from .models import Singer
+from .models import Singer, Song
 from .serializers import SingerSerializer, SongSerializer
 
 from django.shortcuts import get_object_or_404
@@ -32,11 +30,12 @@ def singer_detail_update_delete(request, singer_id):
         return Response(serializer.data)
     
     elif request.method == 'PATCH':
-        serializer = SingerSerializer(instance=singer, data=request.data)
+        serializer = SingerSerializer(instance=singer, data=request.data, partial=True)
         if serializer.is_valid():
             serializer.save()
-        return Response(serializer.data)
-    
+            return Response(serializer.data)
+        return Response(serializer.errors, status=400)
+
     elif request.method == 'DELETE':
         singer.delete()
         data = {
@@ -49,7 +48,7 @@ def song_read_create(request, singer_id):
     singer = get_object_or_404(Singer, id=singer_id)
 
     if (request.method == 'GET'):
-        song = Song.objects.filter(singer=singer)
+        songs = Song.objects.filter(singer=singer)
         serializer = SongSerializer(songs, many=True)
         return Response(data=serializer.data)
 
