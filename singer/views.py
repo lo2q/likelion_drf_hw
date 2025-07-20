@@ -28,10 +28,10 @@ def singer_list(request):
                     tag = Tag(name = t)
                     tag.save()
                 singer.tags.add(tag)
-
-            for file in request.FILES.getlist('images'):
-                SingerImage.objects.create(singer=singer, image=file)
-            singer.save()
+            if request.FILES.getlist('images'):
+                for file in request.FILES.getlist('images'):
+                    SingerImage.objects.create(singer=singer, image=file)
+                singer.save()
             return Response(data=SingerSerializer(singer).data)
 
 @api_view(['GET', 'PATCH', 'DELETE'])
